@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: upsc-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/upsc_ai
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+
+server:
+  port: 8080
