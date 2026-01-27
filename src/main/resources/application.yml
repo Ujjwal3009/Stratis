@@ -23,3 +23,48 @@ spring:
 
 server:
   port: 8080
+
+# Logging configuration
+logging:
+  level:
+    com.upsc.ai: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    name: logs/application.log
+
+# Management and Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  info:
+    env:
+      enabled: true
+
+# Application info
+info:
+  app:
+    name: UPSC AI Backend
+    description: AI-powered UPSC Test Platform
+    version: 0.0.1-SNAPSHOT
+    encoding: @project.build.sourceEncoding@
+    java:
+      version: @java.version@
