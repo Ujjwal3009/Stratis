@@ -15,7 +15,7 @@
 	<description>AI-powered UPSC Test Platform</description>
 	<properties>
 		<java.version>17</java.version>
-		<spring-ai.version>0.8.1</spring-ai.version>
+		<spring-ai.version>1.0.0-M1</spring-ai.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -35,8 +35,8 @@
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -65,6 +65,17 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<build>
 		<plugins>
