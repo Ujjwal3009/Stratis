@@ -10,17 +10,22 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/health", "/h2-console/**").permitAll()
-                        .anyRequest().authenticated())
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**"))
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .authorizeHttpRequests(authorize -> authorize
+                                                .requestMatchers(
+                                                                "/api/v1/health",
+                                                                "/api/v1/test/**",
+                                                                "/h2-console/**",
+                                                                "/actuator/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers("/h2-console/**", "/actuator/**"))
+                                .headers(headers -> headers
+                                                .frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
-        return http.build();
-    }
+                return http.build();
+        }
 }
