@@ -6,10 +6,11 @@
 -- Default Admin User
 -- ============================================
 
--- Insert admin user (using INSERT ON CONFLICT for PostgreSQL/H2 compatibility)
+-- Insert admin user (using MERGE for H2 compatibility)
 -- Password: admin123 (bcrypt hashed)
 -- Note: In production, this should be changed immediately
-INSERT INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+MERGE INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+KEY (email)
 VALUES (
     'admin@upsc-ai.com',
     'admin',
@@ -19,15 +20,15 @@ VALUES (
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
-)
-ON CONFLICT (email) DO NOTHING;
+);
 
 -- ============================================
 -- Sample Test Users
 -- ============================================
 
 -- Test user 1 (password: test123)
-INSERT INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+MERGE INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+KEY (email)
 VALUES (
     'test@upsc-ai.com',
     'testuser',
@@ -37,8 +38,7 @@ VALUES (
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
-)
-ON CONFLICT (email) DO NOTHING;
+);
 
 -- ============================================
 -- Sample Questions (Optional - for development)
