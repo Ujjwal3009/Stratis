@@ -81,8 +81,9 @@ public class GeminiAiService {
         return parseJsonResponse(output);
     }
 
-    public List<ParsedQuestion> generateQuestions(String subject, String topic, String minDifficulty, int count) {
-        String prompt = buildQuestionGenerationPrompt(subject, topic, minDifficulty, count);
+    public List<ParsedQuestion> generateQuestions(String subject, String topic, String minDifficulty, int count,
+            String context) {
+        String prompt = buildQuestionGenerationPrompt(subject, topic, minDifficulty, count, context);
         String output;
 
         if (model != null) {
@@ -157,37 +158,68 @@ public class GeminiAiService {
                 """ + text;
     }
 
-    private String buildQuestionGenerationPrompt(String subject, String topic, String minDifficulty, int count) {
-        return String.format("""
-                You are an expert UPSC content creator. Generate %d HIGH-QUALITY MCQ questions for the following topic.
-                Subject: %s
-                Topic: %s
-                Minimum Difficulty Level: %s
+    private String buildQuestionGenerationPrompt(String subject, String topic, String minDifficulty, int count,
+            String context) {
+        String basePrompt = String.format(
+                """
+                        You are a senior UPSC Civil Services Examination (CSE) expert.
+                        Generate %d UPSC-style MCQ questions for the following topic.
+                        Subject: %s
+                        Topic: %s
+                        Target Difficulty: %s
 
-                CRITICAL GUIDELINES:
-                1. The questions must be at the specified difficulty level (%s) OR HARDER.
-                2. If the level is MEDIUM, do NOT generate EASY questions.
-                3. If the level is HARD, generate only advanced, multi-statement questions typical of UPSC CSE.
-                4. Each question must have exactly 4 options with one correct answer.
-                5. Provide a detailed explanation for each answer.
+                        CRITICAL UPSC QUESTION DESIGN GUIDELINES:
+                        1. DYNAMIC STRUCTURE: For HARD and MEDIUM questions, use multi-statement formats followed by "Select the correct answer using the code given below:".
+                           Example:
+                           Statement 1: [Concept A]
+                           Statement 2: [Concept B]
+                           Which of the statements given above is/are correct?
+                           (a) 1 only (b) 2 only (c) Both 1 and 2 (d) Neither 1 nor 2
+                        2. DEPTH: Avoid simple factual recall. Focus on conceptual clarity, causal relationships, and analytic reasoning.
+                        3. DISTRACTORS: Options should be plausible and challenging. Use "Pair matching" or "Only one pair, Only two pairs" style distractor if appropriate.
+                        4. LANGUAGE: Use professional, academic, and complex terminology as found in official UPSC GS papers.
+                        5. EXPLANATION: Provide a "Rationale" explaining why each statement is correct or incorrect.
 
-                Format each question as a JSON object:
+                        """,
+                count, subject, topic, minDifficulty);
+
+        if (context != null && !context.isBlank()) {
+            basePrompt += String.format(
+                    """
+                            CONTEXTUAL SOURCE MATERIAL:
+                            The questions MUST be framed based on the information provided in the following excerpt:
+                            ---
+                            %s
+                            ---
+
+                            Ensure the questions test understanding of this specific content while maintaining the UPSC level of analytical rigor.
+
+                            """,
+                    context);
+        } else {
+            basePrompt += "Use your vast knowledge database to generate original questions corresponding to the UPSC syllabus for this topic.\n\n";
+        }
+
+        basePrompt += String.format("""
+                FORMAT EACH QUESTION AS A JSON OBJECT:
                 {
-                    "questionText": "The text of the question",
+                    "questionText": "The full text of the question including statements",
                     "questionType": "MCQ",
-                    "difficultyLevel": "%s", (or HARD if requested level is MEDIUM, etc.)
+                    "difficultyLevel": "%s",
                     "subject": "%s",
                     "topic": "%s",
-                    "explanation": "Detailed explanation",
+                    "explanation": "Detailed professional rationale",
                     "options": [
-                        {"text": "Option 1", "isCorrect": false, "order": 1},
-                        {"text": "Option 2", "isCorrect": true, "order": 2},
+                        {"text": "Option A (or 1 only)", "isCorrect": false, "order": 1},
+                        {"text": "Option B (or 2 only)", "isCorrect": true, "order": 2},
                         ...
                     ]
                 }
 
-                Return ONLY a JSON array of %d these objects.
-                """, count, subject, topic, minDifficulty, minDifficulty, minDifficulty, subject, topic, count);
+                Return ONLY a JSON array of %d these objects. No introduction or closing text.
+                """, minDifficulty, subject, topic, count);
+
+        return basePrompt;
     }
 
     private List<ParsedQuestion> parseJsonResponse(String output) {

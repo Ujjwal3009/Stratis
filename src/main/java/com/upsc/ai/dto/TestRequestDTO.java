@@ -12,6 +12,7 @@ public class TestRequestDTO {
     private String description;
     private Long subjectId;
     private Long topicId;
+    private Long pdfId; // Optional: context for generation
     private String difficulty; // EASY, MEDIUM, HARD
     private Integer count;
     private Integer durationMinutes;

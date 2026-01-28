@@ -35,6 +35,12 @@ public class TestGenerationService {
     @Autowired
     private GeminiAiService geminiAiService;
 
+    @Autowired
+    private PdfDocumentRepository pdfDocumentRepository;
+
+    @Autowired
+    private PdfTextExtractorService pdfTextExtractor;
+
     @Transactional
     public TestResponseDTO generateTest(TestRequestDTO request, User user) {
         Subject subject = subjectRepository.findById(request.getSubjectId())
@@ -43,7 +49,6 @@ public class TestGenerationService {
         Topic topic = request.getTopicId() != null ? topicRepository.findById(request.getTopicId()).orElse(null) : null;
 
         // 1. Fetch matching questions from DB
-        // Difficulty filter: Bank questions must be at least as hard as requested
         List<Question.DifficultyLevel> targetLevels = getMatchingLevels(request.getDifficulty());
 
         List<Question> bankQuestions = questionRepository.findAll().stream()
@@ -61,16 +66,43 @@ public class TestGenerationService {
         // 2. Clear gaps with AI if bank is insufficient
         int gap = request.getCount() - selectedQuestions.size();
         if (gap > 0) {
+            String context = null;
+            Long contextPdfId = request.getPdfId();
+
+            // Automatic context if none provided: find most recent processed PDF by user
+            if (contextPdfId == null) {
+                contextPdfId = pdfDocumentRepository.findAll().stream()
+                        .filter(p -> p.getStatus() == PdfDocument.DocumentStatus.PROCESSED)
+                        .filter(p -> p.getUploadedBy() != null && p.getUploadedBy().getId().equals(user.getId()))
+                        .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                        .map(PdfDocument::getId)
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (contextPdfId != null) {
+                PdfDocument pdf = pdfDocumentRepository.findById(contextPdfId).orElse(null);
+                if (pdf != null) {
+                    try {
+                        String fullText = pdfTextExtractor.extractText(pdf.getFilePath());
+                        // Take a significant chunk for context
+                        context = fullText.substring(0, Math.min(fullText.length(), 15000));
+                    } catch (Exception e) {
+                        System.err.println("Warning: Could not extract context from PDF (" + contextPdfId + "): "
+                                + e.getMessage());
+                    }
+                }
+            }
+
             String topicName = topic != null ? topic.getName() : "General " + subject.getName();
             List<ParsedQuestion> aiParsedQuestions = geminiAiService.generateQuestions(
                     subject.getName(),
                     topicName,
                     request.getDifficulty(),
-                    gap);
+                    gap,
+                    context);
 
             for (ParsedQuestion pq : aiParsedQuestions) {
-                // Map to entity using existing logic in QuestionProcessingService helper
-                // (I'll need to expose the mapToEntity method or similar)
                 Question aiQuestion = mapToEntity(pq, subject, topic, user);
                 selectedQuestions.add(questionRepository.save(aiQuestion));
             }
@@ -86,7 +118,11 @@ public class TestGenerationService {
         test.setTotalQuestions(selectedQuestions.size());
         test.setTotalMarks(selectedQuestions.size()); // Default 1 mark per question
         test.setTestType(Test.TestType.AI_GENERATED);
-        test.setDurationMinutes(request.getDurationMinutes());
+
+        // Fix for 500 error: ensure durationMinutes is never null
+        Integer duration = request.getDurationMinutes();
+        test.setDurationMinutes(duration != null ? duration : 60);
+
         test.setCreatedBy(user);
         test.setQuestions(selectedQuestions);
         test.setCreatedAt(LocalDateTime.now());
