@@ -1,5 +1,9 @@
 # UPSC AI Backend
 
+![CI](https://github.com/Ujjwal3009/Stratis/workflows/CI/badge.svg)
+![Code Quality](https://github.com/Ujjwal3009/Stratis/workflows/Code%20Quality/badge.svg)
+![Migration Tests](https://github.com/Ujjwal3009/Stratis/workflows/Migration%20Tests/badge.svg)
+
 AI-powered UPSC Test Platform - Backend API built with Spring Boot
 
 ## 📋 Table of Contents
