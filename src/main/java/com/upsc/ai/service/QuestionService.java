@@ -1,11 +1,8 @@
 package com.upsc.ai.service;
 
 import com.upsc.ai.dto.QuestionDTO;
-import com.upsc.ai.entity.Question;
 import com.upsc.ai.exception.BusinessException;
 import com.upsc.ai.repository.QuestionRepository;
-import com.upsc.ai.repository.SubjectRepository;
-import com.upsc.ai.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +15,6 @@ public class QuestionService {
 
     @Autowired
     private QuestionRepository questionRepository;
-
-    @Autowired
-    private SubjectRepository subjectRepository;
-
-    @Autowired
-    private TopicRepository topicRepository;
 
     public List<QuestionDTO> listQuestions(Long subjectId, String difficulty) {
         // Simple implementation for now, can be expanded with Specification
