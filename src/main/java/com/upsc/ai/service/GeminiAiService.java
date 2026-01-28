@@ -162,7 +162,7 @@ public class GeminiAiService {
             String context) {
         String basePrompt = String.format(
                 """
-                        You are a senior UPSC Civil Services Examination (CSE) expert.
+                        You are a senior UPSC Civil Services Preliminary Examination (Prelims) expert.
                         Generate %d UPSC-style MCQ questions for the following topic.
                         Subject: %s
                         Topic: %s

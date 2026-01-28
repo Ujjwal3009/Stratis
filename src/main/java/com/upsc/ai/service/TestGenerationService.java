@@ -39,7 +39,7 @@ public class TestGenerationService {
     private PdfDocumentRepository pdfDocumentRepository;
 
     @Autowired
-    private PdfTextExtractorService pdfTextExtractor;
+    private PdfChunkService pdfChunkService;
 
     @Transactional
     public TestResponseDTO generateTest(TestRequestDTO request, User user) {
@@ -83,13 +83,19 @@ public class TestGenerationService {
             if (contextPdfId != null) {
                 PdfDocument pdf = pdfDocumentRepository.findById(contextPdfId).orElse(null);
                 if (pdf != null) {
-                    try {
-                        String fullText = pdfTextExtractor.extractText(pdf.getFilePath());
-                        // Take a significant chunk for context
-                        context = fullText.substring(0, Math.min(fullText.length(), 15000));
-                    } catch (Exception e) {
-                        System.err.println("Warning: Could not extract context from PDF (" + contextPdfId + "): "
-                                + e.getMessage());
+                    List<PdfChunk> chunks = pdfChunkService.getChunksByPdf(pdf);
+                    if (!chunks.isEmpty()) {
+                        context = chunks.stream()
+                                .map(PdfChunk::getChunkText)
+                                .collect(Collectors.joining("\n---\n"));
+
+                        // Gemini 1.5 Flash has a massive context window, but for efficiency we still
+                        // cap reasonably.
+                        // 30,000 chars is roughly 7-10k tokens, well within limits.
+                        int limit = 30000;
+                        if (context.length() > limit) {
+                            context = context.substring(0, limit) + "... [TRUNCATED FOR PROMPT]";
+                        }
                     }
                 }
             }

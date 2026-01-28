@@ -38,6 +38,9 @@ public class QuestionProcessingService {
     @Autowired
     private PdfDocumentRepository pdfDocumentRepository;
 
+    @Autowired
+    private PdfChunkService pdfChunkService;
+
     @Transactional
     public ProcessingResult processPdf(Long pdfId, User user) {
         PdfDocument pdf = pdfDocumentRepository.findById(pdfId)
@@ -50,7 +53,10 @@ public class QuestionProcessingService {
             // 1. Extract text
             String text = pdfTextExtractor.extractText(pdf.getFilePath());
 
-            // 2. Parse questions with Gemini
+            // 2. [NEW] Create chunks for context-aware generation
+            pdfChunkService.createChunks(pdf, text);
+
+            // 3. Parse questions with Gemini
             List<ParsedQuestion> parsedQuestions = geminiAiService.parseQuestions(text);
 
             // 3. Save questions

@@ -1,11 +1,15 @@
 package com.upsc.ai.controller;
 
+import com.upsc.ai.dto.PdfChunkDTO;
 import com.upsc.ai.dto.PdfDocumentDTO;
 import com.upsc.ai.dto.PdfUploadResponse;
+import com.upsc.ai.entity.PdfDocument;
 import com.upsc.ai.entity.PdfDocument.DocumentType;
 import com.upsc.ai.entity.User;
+import com.upsc.ai.repository.PdfDocumentRepository;
 import com.upsc.ai.repository.UserRepository;
 import com.upsc.ai.security.UserPrincipal;
+import com.upsc.ai.service.PdfChunkService;
 import com.upsc.ai.service.PdfDocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pdfs")
@@ -24,6 +29,12 @@ public class PdfUploadController {
 
     @Autowired
     private PdfDocumentService pdfService;
+
+    @Autowired
+    private PdfChunkService pdfChunkService;
+
+    @Autowired
+    private PdfDocumentRepository pdfDocumentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -81,6 +92,18 @@ public class PdfUploadController {
     public ResponseEntity<PdfDocumentDTO> getPdfDetails(@PathVariable Long id) {
         PdfDocumentDTO pdf = pdfService.getPdfById(id);
         return ResponseEntity.ok(pdf);
+    }
+
+    @GetMapping("/{id}/chunks")
+    public ResponseEntity<List<PdfChunkDTO>> getPdfChunks(@PathVariable Long id) {
+        PdfDocument pdf = pdfDocumentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PDF not found"));
+
+        List<PdfChunkDTO> chunks = pdfChunkService.getChunksByPdf(pdf).stream()
+                .map(chunk -> new PdfChunkDTO(chunk.getChunkText(), chunk.getChunkOrder()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(chunks);
     }
 
     @GetMapping("/{id}/download")
