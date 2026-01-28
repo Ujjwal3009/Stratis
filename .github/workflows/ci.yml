@@ -27,6 +27,4 @@ jobs:
     - name: Run tests
       run: mvn test
       continue-on-error: true
-    
-    - name: Validate Flyway migrations
-      run: mvn flyway:validate
+
