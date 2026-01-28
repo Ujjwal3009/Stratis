@@ -29,6 +29,12 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+  
+  flyway:
+    enabled: true
+    clean-disabled: true  # Prevent accidental clean
+    validate-on-migrate: true
+    out-of-order: false  # Strict ordering in production
 
 server:
   error:
