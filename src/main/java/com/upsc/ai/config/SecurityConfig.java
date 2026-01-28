@@ -47,13 +47,19 @@ public class SecurityConfig {
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
                                                                 "/swagger-ui.html")
                                                 .permitAll()
-                                                .requestMatchers("/api/test/**", "/api/tests/**").permitAll()
-                                                .requestMatchers("/api/pdfs/**", "/api/questions/**").permitAll()
-                                                .requestMatchers("/api/health/**").permitAll()
+                                                .requestMatchers("/api/test/**", "/api/tests/**").authenticated()
+                                                .requestMatchers("/api/pdfs/**", "/api/questions/**").authenticated()
+                                                .requestMatchers("/api/health/**", "/api/subjects/**").permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler))
+                                .exceptionHandling(exceptions -> exceptions
+                                                .defaultAuthenticationEntryPointFor(
+                                                                new org.springframework.security.web.authentication.HttpStatusEntryPoint(
+                                                                                org.springframework.http.HttpStatus.UNAUTHORIZED),
+                                                                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
+                                                                                "/api/**")))
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 // Allow H2 console frames

@@ -100,4 +100,8 @@ public class TestService {
                 attempt.getCompletedAt(),
                 results);
     }
+
+    public List<TestAttempt> getAttemptsByUser(User user) {
+        return attemptRepository.findByUserOrderByStartedAtDesc(user);
+    }
 }

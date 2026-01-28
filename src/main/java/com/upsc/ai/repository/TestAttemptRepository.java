@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface TestAttemptRepository extends JpaRepository<TestAttempt, Long> {
     List<TestAttempt> findByUser_Id(Long userId);
+
+    List<TestAttempt> findByUserOrderByStartedAtDesc(com.upsc.ai.entity.User user);
 }
