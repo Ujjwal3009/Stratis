@@ -15,10 +15,15 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
+  
+  flyway:
+    enabled: true
+    clean-disabled: false  # Allow clean in development
+    baseline-on-migrate: true
 
 server:
   error:
