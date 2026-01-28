@@ -31,6 +31,7 @@ public class TestService {
         attempt.setUser(user);
         attempt.setStatus(TestAttempt.AttemptStatus.IN_PROGRESS);
         attempt.setStartedAt(LocalDateTime.now());
+        attempt.setTotalMarks(test.getTotalMarks() != null ? test.getTotalMarks() : 0);
         return attemptRepository.save(attempt);
     }
 

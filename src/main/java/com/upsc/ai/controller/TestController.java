@@ -15,6 +15,8 @@ import com.upsc.ai.service.TestService;
 import com.upsc.ai.entity.TestAttempt;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.upsc.ai.exception.BusinessException;
+import com.upsc.ai.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -74,13 +76,13 @@ public class TestController {
                         @AuthenticationPrincipal UserPrincipal currentUser) {
 
                 if (currentUser == null) {
-                        throw new RuntimeException("Unauthorized");
+                        throw new BusinessException("Unauthorized: Please log in again");
                 }
                 User user = userRepository.findById(currentUser.getId())
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("User", "id", currentUser.getId()));
 
                 Test test = testRepository.findById(testId)
-                                .orElseThrow(() -> new RuntimeException("Test not found"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Test", "id", testId));
 
                 TestAttempt attempt = testService.startAttempt(test, user);
                 return ResponseEntity.ok(attempt.getId());

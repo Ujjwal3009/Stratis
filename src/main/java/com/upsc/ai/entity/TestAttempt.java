@@ -37,6 +37,9 @@ public class TestAttempt {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "total_marks", nullable = false)
+    private Integer totalMarks = 0;
+
     public enum AttemptStatus {
         IN_PROGRESS, COMPLETED, ABANDONED
     }
