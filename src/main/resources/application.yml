@@ -46,6 +46,12 @@ spring:
       chat:
         options:
           model: gpt-4o-mini
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 server:
   port: ${SERVER_PORT:8080}
@@ -105,6 +111,8 @@ app:
   jwt:
     secret: ${JWT_SECRET:dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9yand0dG9rZW5nZW5lcmF0aW9uYW5kdmFsaWRhdGlvbg==}
     expiration: 86400000  # 24 hours in milliseconds
+  upload:
+    dir: ${UPLOAD_DIR:./uploads}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
@@ -114,4 +122,5 @@ app:
     test-endpoints-enabled: ${TEST_ENDPOINTS_ENABLED:true}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
+
 
