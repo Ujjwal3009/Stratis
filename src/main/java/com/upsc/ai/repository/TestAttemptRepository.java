@@ -11,4 +11,9 @@ public interface TestAttemptRepository extends JpaRepository<TestAttempt, Long> 
     List<TestAttempt> findByUser_Id(Long userId);
 
     List<TestAttempt> findByUserOrderByStartedAtDesc(com.upsc.ai.entity.User user);
+
+    java.util.Optional<TestAttempt> findFirstByTestAndUserAndStatusOrderByStartedAtDesc(
+            com.upsc.ai.entity.Test test,
+            com.upsc.ai.entity.User user,
+            TestAttempt.AttemptStatus status);
 }

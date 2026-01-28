@@ -6,42 +6,15 @@
 -- Default Admin User
 -- ============================================
 
--- Insert admin user (using INSERT ON CONFLICT for PostgreSQL/H2 compatibility)
--- Password: admin123 (bcrypt hashed)
--- Note: In production, this should be changed immediately
--- Insert admin user (using MERGE for H2 compatibility)
--- Password: admin123 (bcrypt hashed)
--- Note: In production, this should be changed immediately
-MERGE INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
-KEY (email)
-VALUES (
-    'admin@upsc-ai.com',
-    'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-    'System Administrator',
-    'ADMIN',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-);
-
--- ============================================
--- Sample Test Users
--- ============================================
+-- Insert admin user (using INSERT ... SELECT for wide compatibility)
+INSERT INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+SELECT 'admin@upsc-ai.com', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'System Administrator', 'ADMIN', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@upsc-ai.com');
 
 -- Test user 1 (password: test123)
-MERGE INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
-KEY (email)
-VALUES (
-    'test@upsc-ai.com',
-    'testuser',
-    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-    'Test User',
-    'USER',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-);
+INSERT INTO users (email, username, password_hash, full_name, role, is_active, created_at, updated_at)
+SELECT 'test@upsc-ai.com', 'testuser', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Test User', 'USER', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'test@upsc-ai.com');
 
 -- ============================================
 -- Sample Questions (Optional - for development)
@@ -66,6 +39,7 @@ VALUES
     ((SELECT id FROM questions WHERE question_text LIKE 'Who was the first President%'), 'Jawaharlal Nehru', false, 2),
     ((SELECT id FROM questions WHERE question_text LIKE 'Who was the first President%'), 'Sardar Vallabhbhai Patel', false, 3),
     ((SELECT id FROM questions WHERE question_text LIKE 'Who was the first President%'), 'Dr. B.R. Ambedkar', false, 4);
+
 
 -- Sample MCQ Question 2
 INSERT INTO questions (question_text, question_type, difficulty_level, subject, topic, explanation, created_by)
