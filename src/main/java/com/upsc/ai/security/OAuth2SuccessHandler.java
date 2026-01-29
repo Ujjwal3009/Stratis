@@ -1,7 +1,5 @@
 package com.upsc.ai.security;
 
-import com.upsc.ai.dto.AuthResponse;
-import com.upsc.ai.dto.UserDTO;
 import com.upsc.ai.entity.User;
 import com.upsc.ai.repository.UserRepository;
 import jakarta.servlet.ServletException;

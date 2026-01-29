@@ -1,6 +1,12 @@
 spring:
   application:
     name: upsc-backend
+
+# Sentry Configuration
+sentry:
+  dsn: ${SENTRY_DSN:https://695c4d4daa40d9a82cc906af8cc866ef@o4510794552246272.ingest.de.sentry.io/4510794561552464}
+  traces-sample-rate: 1.0
+  exception-resolver-order: -2147483647 # Highest priority
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   

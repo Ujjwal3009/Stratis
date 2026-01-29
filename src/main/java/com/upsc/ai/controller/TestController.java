@@ -13,7 +13,6 @@ import com.upsc.ai.repository.UserRepository;
 import com.upsc.ai.security.UserPrincipal;
 import com.upsc.ai.service.TestGenerationService;
 import com.upsc.ai.service.TestService;
-import com.upsc.ai.entity.TestAttempt;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.upsc.ai.exception.BusinessException;

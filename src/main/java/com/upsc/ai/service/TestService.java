@@ -358,6 +358,7 @@ public class TestService {
             analysis.setAiDiagnosticSummary((String) aiMap.get("diagnosticSummary"));
             analysis.setSynthesizedStudyNotes((String) aiMap.get("studyNotes"));
 
+            @SuppressWarnings("unchecked")
             List<Map<String, String>> swList = (List<Map<String, String>>) aiMap.get("strengthWeaknessPairs");
             if (swList != null) {
                 analysis.setStrengthWeaknessPairs(swList.stream()
@@ -366,6 +367,7 @@ public class TestService {
             }
 
             // Map mistake counts
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> mList = (List<Map<String, Object>>) aiMap.get("mistakeCategorization");
             if (mList != null) {
                 Map<String, Integer> mCounts = new HashMap<>();
