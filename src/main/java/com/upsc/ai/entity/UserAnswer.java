@@ -32,6 +32,12 @@ public class UserAnswer {
     @Column(name = "is_correct")
     private Boolean isCorrect;
 
+    @Column(name = "time_spent_seconds")
+    private Integer timeSpentSeconds;
+
+    @Column(name = "answer_type")
+    private String answerType;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

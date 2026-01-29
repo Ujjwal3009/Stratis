@@ -12,13 +12,41 @@ import java.util.List;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    List<Question> findBySubject(Subject subject);
+        List<Question> findBySubject(Subject subject);
 
-    List<Question> findByTopic(Topic topic);
+        List<Question> findByTopic(Topic topic);
 
-    List<Question> findByDifficultyLevel(DifficultyLevel difficultyLevel);
+        List<Question> findByDifficultyLevel(DifficultyLevel difficultyLevel);
 
-    List<Question> findBySourcePdf(PdfDocument sourcePdf);
+        List<Question> findBySourcePdf(PdfDocument sourcePdf);
 
-    List<Question> findByIsVerified(Boolean isVerified);
+        List<Question> findByIsVerified(Boolean isVerified);
+
+        @org.springframework.data.jpa.repository.Query("SELECT q FROM Question q " +
+                        "LEFT JOIN UserQuestionAttempt uqa ON q.id = uqa.question.id AND uqa.user.id = :userId " +
+                        "WHERE uqa.id IS NULL " +
+                        "AND q.subject.id = :subjectId " +
+                        "AND (:topicId IS NULL OR q.topic.id = :topicId) " +
+                        "AND q.difficultyLevel IN :difficultyLevels " +
+                        "AND q.createdSource = :createdSource " +
+                        "AND q.isActive = true")
+        List<Question> findUnseenQuestions(
+                        @org.springframework.data.repository.query.Param("userId") Long userId,
+                        @org.springframework.data.repository.query.Param("subjectId") Long subjectId,
+                        @org.springframework.data.repository.query.Param("topicId") Long topicId,
+                        @org.springframework.data.repository.query.Param("difficultyLevels") List<DifficultyLevel> difficultyLevels,
+                        @org.springframework.data.repository.query.Param("createdSource") String createdSource,
+                        org.springframework.data.domain.Pageable pageable);
+
+        @org.springframework.data.jpa.repository.Query("SELECT COUNT(q) FROM Question q " +
+                        "WHERE q.subject.id = :subjectId " +
+                        "AND (:topicId IS NULL OR q.topic.id = :topicId) " +
+                        "AND q.difficultyLevel IN :difficultyLevels " +
+                        "AND q.isActive = true")
+        long countAvailableQuestions(
+                        @org.springframework.data.repository.query.Param("subjectId") Long subjectId,
+                        @org.springframework.data.repository.query.Param("topicId") Long topicId,
+                        @org.springframework.data.repository.query.Param("difficultyLevels") List<DifficultyLevel> difficultyLevels);
+
+        java.util.Optional<Question> findByNormalizedHash(String normalizedHash);
 }

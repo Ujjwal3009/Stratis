@@ -71,6 +71,6 @@ public class Test {
     }
 
     public enum TestType {
-        MOCK, PRACTICE, PREVIOUS_YEAR, AI_GENERATED
+        MOCK, PRACTICE, PREVIOUS_YEAR, AI_GENERATED, PRELIMS
     }
 }

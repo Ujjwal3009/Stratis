@@ -2,6 +2,7 @@ package com.upsc.ai.controller;
 
 import com.upsc.ai.dto.TestRequestDTO;
 import com.upsc.ai.dto.TestResponseDTO;
+import com.upsc.ai.dto.TestAnalysisDTO;
 import com.upsc.ai.dto.TestResultDTO;
 import com.upsc.ai.dto.TestSubmissionDTO;
 import com.upsc.ai.entity.Test;
@@ -98,15 +99,31 @@ public class TestController {
                 return ResponseEntity.ok(testService.submitAttempt(submission));
         }
 
+        @GetMapping("/attempts/{attemptId}/analysis")
+        public ResponseEntity<TestAnalysisDTO> getTestAnalysis(
+                        @PathVariable Long attemptId) {
+                return ResponseEntity.ok(testService.generateAnalysis(attemptId));
+        }
+
+        @PostMapping("/attempts/{attemptId}/remedial")
+        public ResponseEntity<TestResponseDTO> createRemedialTest(
+                        @PathVariable Long attemptId,
+                        @AuthenticationPrincipal UserPrincipal currentUser) {
+                User user = userRepository.findById(currentUser.getId())
+                                .orElseThrow(() -> new ResourceNotFoundException("User", "id", currentUser.getId()));
+                return ResponseEntity.ok(generationService.generateRemedialTest(attemptId, user));
+        }
+
         @Operation(summary = "Get test by ID", description = "Retrieve test details by ID")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Test found", content = @Content(schema = @Schema(implementation = Test.class))),
                         @ApiResponse(responseCode = "404", description = "Test not found", content = @Content)
         })
         @GetMapping("/{id}")
-        public ResponseEntity<Test> getTest(@PathVariable Long id) {
-                return ResponseEntity.ok(testRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Test not found")));
+        public ResponseEntity<TestResponseDTO> getTest(@PathVariable Long id) {
+                Test test = testRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Test", "id", id));
+                return ResponseEntity.ok(TestResponseDTO.fromEntity(test));
         }
 
         @Operation(summary = "Get user test history", description = "Retrieve past test attempts")

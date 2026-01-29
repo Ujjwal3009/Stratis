@@ -51,7 +51,45 @@ public class Question {
     @Column(name = "is_verified")
     private Boolean isVerified = false;
 
+    // New Question Bank Fields
+    @Column(name = "cognitive_level")
+    private String cognitiveLevel;
+
+    // stored as JSON (String) in DB
+    @Column(name = "options", columnDefinition = "TEXT")
+    private String optionsJson;
+
+    @Column(name = "correct_answer")
+    private String correctAnswer;
+
+    @Column(name = "explanation_json", columnDefinition = "TEXT")
+    private String explanationJson;
+
+    @Column(name = "exam_year")
+    private Integer year;
+
+    @Column(name = "paper")
+    private String paper;
+
+    @Column(name = "passage", columnDefinition = "TEXT")
+    private String passage;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "normalized_hash")
+    private String normalizedHash;
+
+    @Column(name = "created_source")
+    private String createdSource;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<QuestionOption> options;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -77,5 +115,27 @@ public class Question {
 
     public enum DifficultyLevel {
         EASY, MEDIUM, HARD
+    }
+
+    public void generateHash() {
+        if (this.questionText == null)
+            return;
+        try {
+            String combined = this.questionText.trim().toLowerCase().replaceAll("\\s+", " ");
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = digest.digest(combined.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder(2 * encodedhash.length);
+            for (int i = 0; i < encodedhash.length; i++) {
+                String hex = Integer.toHexString(0xff & encodedhash[i]);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            this.normalizedHash = hexString.toString();
+        } catch (Exception e) {
+            // fallback
+            this.normalizedHash = String.valueOf(this.questionText.hashCode());
+        }
     }
 }

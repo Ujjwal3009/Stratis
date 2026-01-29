@@ -88,18 +88,95 @@ public class GeminiAiService {
 
         if (model != null) {
             try {
+                System.out.println("Using Vertex AI Model for generation");
                 GenerateContentResponse response = model.generateContent(prompt);
                 output = ResponseHandler.getText(response);
+            } catch (IOException e) {
+                System.err.println("Vertex AI failed: " + e.getMessage());
+                throw new BusinessException("Error calling Vertex AI: " + e.getMessage());
+            }
+        } else if (apiKey != null && !apiKey.isEmpty()) {
+            try {
+                System.out.println("Using Direct REST API for generation with Key ending in: "
+                        + (apiKey.length() > 4 ? apiKey.substring(apiKey.length() - 4) : "****"));
+                output = callDirectApi(prompt);
+            } catch (Exception e) {
+                System.err.println("Gemini API failed with exception: " + e.getMessage());
+                e.printStackTrace();
+                System.out.println("Switching to static fallback questions...");
+                return loadStaticQuestions();
+            }
+        } else {
+            System.out.println("No API Key or Model configured. Using Mock.");
+            return mockParseQuestions("Generation for " + subject);
+        }
+
+        try {
+            return parseJsonResponse(output);
+        } catch (Exception e) {
+            System.err.println("Error parsing JSON response. Using static fallback questions.");
+            return loadStaticQuestions();
+        }
+    }
+
+    private List<ParsedQuestion> loadStaticQuestions() {
+        try {
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource(
+                    "static_questions.json");
+            String json = new String(resource.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            Type listType = new TypeToken<ArrayList<ParsedQuestion>>() {
+            }.getType();
+            return gson.fromJson(json, listType);
+        } catch (Exception e) {
+            System.err.println("Failed to load static fallback questions: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public String generateAnalysisInsights(String analysisContext) {
+        String prompt = buildAnalysisPrompt(analysisContext);
+        if (model != null) {
+            try {
+                GenerateContentResponse response = model.generateContent(prompt);
+                return ResponseHandler.getText(response);
             } catch (IOException e) {
                 throw new BusinessException("Error calling Vertex AI: " + e.getMessage());
             }
         } else if (apiKey != null && !apiKey.isEmpty()) {
-            output = callDirectApi(prompt);
+            return callDirectApi(prompt);
         } else {
-            return mockParseQuestions("Generation for " + subject);
+            return "{\"diagnosticSummary\": \"Mock analysis: You performed well in History but need to focus on timing for Economy.\", \"studyNotes\": \"Key concept: Fiscal policy impact on inflation...\", \"strengthWeaknessPairs\": [{\"point\": \"Ancient History recall\", \"strategy\": \"Practice mapping sites to periods.\"}], \"mistakeCategorization\": [{\"questionId\": 1, \"type\": \"SILLY_MISTAKE\", \"reason\": \"Fast response on easy question\"}]}";
         }
+    }
 
-        return parseJsonResponse(output);
+    private String buildAnalysisPrompt(String context) {
+        return """
+                You are a senior UPSC mentor and performance analyst.
+                Analyze the following test results for a UPSC aspirant and provide a deep diagnostic report.
+
+                DATA TO ANALYZE:
+                """ + context
+                + """
+
+                        YOUR GOAL:
+                        1. Identify patterns in mistakes (Silly vs Knowledge Gap vs Logical).
+                        2. Provide 'Study Notes': A concise bulleted summary of the core concepts tested in the test that the user should review.
+                        3. Strength vs Weakness: High-level actionable points.
+
+                        RETURN FORMAT (JSON ONLY):
+                        {
+                            "diagnosticSummary": "A professional paragraph summarizing performance and behavior.",
+                            "studyNotes": "Markdown formatted bullet points of conceptual highlights from the test.",
+                            "strengthWeaknessPairs": [
+                                {"point": "Strength or Weakness area", "strategy": "Actionable advice"}
+                            ],
+                            "mistakeCategorization": [
+                                {"questionId": 123, "type": "Knowledge Gap | Silly Mistake | Logical Error", "reason": "Brief explanation why"}
+                            ]
+                        }
+
+                        Return ONLY the JSON object.
+                        """;
     }
 
     @SuppressWarnings("unchecked")

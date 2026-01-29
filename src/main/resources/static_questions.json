@@ -1,0 +1,72 @@
+[
+  {
+    "questionText": "With reference to the history of ancient India, Bhavabhuti, Hastimalla and Kshemeshvara were famous?",
+    "questionType": "MCQ",
+    "difficultyLevel": "HARD",
+    "subject": "History",
+    "topic": "Ancient India",
+    "explanation": "These were famous playwrights in ancient India. Bhavabhuti wrote Mahaviracharita, Uttaramacharita and Malatimadhava.",
+    "options": [
+      { "text": "Jain monks", "isCorrect": false, "order": 1 },
+      { "text": "Playwrights", "isCorrect": true, "order": 2 },
+      { "text": "Temple architects", "isCorrect": false, "order": 3 },
+      { "text": "Philosophers", "isCorrect": false, "order": 4 }
+    ]
+  },
+  {
+    "questionText": "Which one of the following is not a bird?",
+    "questionType": "MCQ",
+    "difficultyLevel": "MEDIUM",
+    "subject": "Environment",
+    "topic": "Fauna",
+    "explanation": "Golden Mahseer is a large cyprinid and is considered a fish, not a bird.",
+    "options": [
+      { "text": "Golden Mahseer", "isCorrect": true, "order": 1 },
+      { "text": "Indian Nightjar", "isCorrect": false, "order": 2 },
+      { "text": "Spoonbill", "isCorrect": false, "order": 3 },
+      { "text": "White Ibis", "isCorrect": false, "order": 4 }
+    ]
+  },
+  {
+    "questionText": "The 'Global Financial Stability Report' is prepared by the?",
+    "questionType": "MCQ",
+    "difficultyLevel": "EASY",
+    "subject": "Economy",
+    "topic": "International Institutions",
+    "explanation": "The Global Financial Stability Report (GFSR) is a semiannual report by the International Monetary Fund (IMF).",
+    "options": [
+      { "text": "European Central Bank", "isCorrect": false, "order": 1 },
+      { "text": "International Monetary Fund", "isCorrect": true, "order": 2 },
+      { "text": "International Bank for Reconstruction and Development", "isCorrect": false, "order": 3 },
+      { "text": "Organization for Economic Cooperation and Development", "isCorrect": false, "order": 4 }
+    ]
+  },
+  {
+    "questionText": "Consider the following statements regarding the Preamble of the Indian Constitution:\n1. It is based on the Objective Resolution moved by Jawaharlal Nehru.\n2. It is not justiciable in nature.\nWhich of the statements given above is/are correct?",
+    "questionType": "MCQ",
+    "difficultyLevel": "MEDIUM",
+    "subject": "Polity",
+    "topic": "Constitution",
+    "explanation": "The Preamble is based on the Objective Resolution moved by Nehru in 1946. It is non-justiciable, meaning its provisions are not enforceable in courts.",
+    "options": [
+      { "text": "1 only", "isCorrect": false, "order": 1 },
+      { "text": "2 only", "isCorrect": false, "order": 2 },
+      { "text": "Both 1 and 2", "isCorrect": true, "order": 3 },
+      { "text": "Neither 1 nor 2", "isCorrect": false, "order": 4 }
+    ]
+  },
+  {
+    "questionText": "Which of the following is the correct sequence of the occurrence of the following cities in South-East Asia as one proceeds from South to North?",
+    "questionType": "MCQ",
+    "difficultyLevel": "HARD",
+    "subject": "Geography",
+    "topic": "World Geography",
+    "explanation": "The correct order from South to North is: Jakarta (Indonesia), Singapore, Bangkok (Thailand), Hanoi (Vietnam).",
+    "options": [
+      { "text": "Bangkok - Singapore - Jakarta - Hanoi", "isCorrect": false, "order": 1 },
+      { "text": "Jakarta - Singapore - Bangkok - Hanoi", "isCorrect": true, "order": 2 },
+      { "text": "Jakarta - Bangkok - Singapore - Hanoi", "isCorrect": false, "order": 3 },
+      { "text": "Singapore - Jakarta - Bangkok - Hanoi", "isCorrect": false, "order": 4 }
+    ]
+  }
+]

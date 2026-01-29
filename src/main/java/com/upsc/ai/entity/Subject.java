@@ -25,6 +25,9 @@ public class Subject {
     private String description;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<Topic> topics;
 
     @Column(name = "created_at", nullable = false, updatable = false)

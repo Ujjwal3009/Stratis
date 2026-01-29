@@ -19,6 +19,9 @@ public class QuestionOption {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Question question;
 
     @Column(name = "option_text", columnDefinition = "TEXT", nullable = false)

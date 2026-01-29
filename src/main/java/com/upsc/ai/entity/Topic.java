@@ -19,6 +19,9 @@ public class Topic {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Subject subject;
 
     @Column(nullable = false)

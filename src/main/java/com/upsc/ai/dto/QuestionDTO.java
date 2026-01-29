@@ -46,12 +46,14 @@ public class QuestionDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class QuestionOptionDTO {
+        private Long id;
         private String text;
         private Boolean isCorrect;
         private Integer order;
 
         public static QuestionOptionDTO fromEntity(com.upsc.ai.entity.QuestionOption option) {
             return new QuestionOptionDTO(
+                    option.getId(),
                     option.getOptionText(),
                     option.getIsCorrect(),
                     option.getOptionOrder());
