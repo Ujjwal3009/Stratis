@@ -3,19 +3,12 @@ name: Backend CI
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'upsc-backend/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'upsc-backend/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: upsc-backend
 
     steps:
     - uses: actions/checkout@v4
@@ -39,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: backend-test-reports
-        path: upsc-backend/target/surefire-reports/
+        path: target/surefire-reports/
