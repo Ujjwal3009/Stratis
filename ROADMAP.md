@@ -19,7 +19,10 @@
     - [ ] **Token Monitor**: Visualization of Gemini API usage (Cost Control).
     - [ ] **User Management**: View active users, ban spam accounts.
     - [ ] **Content CMS**: Interface to upload/edit Questions (fix "Polity" vs "Indian Polity" mismatch).
-    - [ ] **System Settings**: Hot-swap API Keys, toggle "Mock Mode" vs "Live AI" without code deploys.
+    - [ ] **Dynamic Config System**: Database-backed settings (not just Env Vars) to hot-swap API Keys or toggle "Maintenance Mode" instantly without restarting server.
+- [ ] **Feedback Loop (Quality Control)**
+    - [ ] **"Report Issue" Button**: Allow users to flag wrong questions/typos directly from the Test UI.
+    - [ ] **Admin Review Queue**: Simple list for you to fix reported questions.
 
 ## Phase 3: Engagement & Growth
 - [ ] **Gamification Layer**
