@@ -1,0 +1,43 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  
+  datasource:
+    url: jdbc:h2:mem:upsc_ai_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+  
+  flyway:
+    enabled: false
+    
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 100ms # Short timeout for tests
+      repositories:
+        enabled: false # Disable Redis Repositories for test
+
+# Mocks and Disables
+GEMINI_API_KEY: mock-api-key
+GEMINI_MODEL: gemini-1.5-flash
+HIBERNATE_STATS: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
