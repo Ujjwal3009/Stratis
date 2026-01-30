@@ -23,73 +23,83 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/questions")
+@RequestMapping("/api/v1/questions")
 @Tag(name = "Questions", description = "Question management and PDF parsing endpoints")
 public class QuestionController {
 
-    @Autowired
-    private QuestionProcessingService processingService;
+        @Autowired
+        private QuestionProcessingService processingService;
 
-    @Autowired
-    private QuestionService questionService;
+        @Autowired
+        private QuestionService questionService;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Operation(summary = "Parse PDF and extract questions", description = "Process a PDF document to extract questions using AI", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "PDF parsed successfully", content = @Content(schema = @Schema(implementation = ProcessingResult.class))),
-            @ApiResponse(responseCode = "404", description = "PDF not found", content = @Content)
-    })
-    @PostMapping("/parse/{pdfId}")
-    public ResponseEntity<ProcessingResult> parsePdf(
-            @PathVariable Long pdfId,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
+        @Operation(summary = "Parse PDF and extract questions", description = "Process a PDF document to extract questions using AI", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "PDF parsed successfully", content = @Content(schema = @Schema(implementation = ProcessingResult.class))),
+                        @ApiResponse(responseCode = "404", description = "PDF not found", content = @Content)
+        })
+        @PostMapping("/parse/{pdfId}")
+        public ResponseEntity<ProcessingResult> parsePdf(
+                        @PathVariable Long pdfId,
+                        @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user;
-        if (currentUser == null) {
-            user = userRepository.findByEmail("test@upsc-ai.com")
-                    .orElseGet(() -> userRepository.findAll().stream().findFirst()
-                            .orElseThrow(() -> new RuntimeException("No users found in database")));
-        } else {
-            user = userRepository.findById(currentUser.getId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                User user;
+                if (currentUser == null) {
+                        user = userRepository.findByEmail("test@upsc-ai.com")
+                                        .orElseGet(() -> userRepository.findAll().stream().findFirst()
+                                                        .orElseThrow(() -> new RuntimeException(
+                                                                        "No users found in database")));
+                } else {
+                        user = userRepository.findById(currentUser.getId())
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
+                }
+
+                ProcessingResult result = processingService.processPdf(pdfId, user);
+                return ResponseEntity.ok(result);
         }
 
-        ProcessingResult result = processingService.processPdf(pdfId, user);
-        return ResponseEntity.ok(result);
-    }
+        @Operation(summary = "List questions", description = "Retrieve questions with optional filters")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Questions retrieved successfully", content = @Content(schema = @Schema(implementation = QuestionDTO.class)))
+        })
+        @GetMapping
+        public ResponseEntity<List<QuestionDTO>> listQuestions(
+                        @Parameter(description = "Filter by subject ID") @RequestParam(required = false) Long subjectId,
+                        @Parameter(description = "Filter by difficulty level") @RequestParam(required = false) String difficulty) {
 
-    @Operation(summary = "List questions", description = "Retrieve questions with optional filters")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Questions retrieved successfully", content = @Content(schema = @Schema(implementation = QuestionDTO.class)))
-    })
-    @GetMapping
-    public ResponseEntity<List<QuestionDTO>> listQuestions(
-            @Parameter(description = "Filter by subject ID") @RequestParam(required = false) Long subjectId,
-            @Parameter(description = "Filter by difficulty level") @RequestParam(required = false) String difficulty) {
+                return ResponseEntity.ok(questionService.listQuestions(subjectId, difficulty));
+        }
 
-        return ResponseEntity.ok(questionService.listQuestions(subjectId, difficulty));
-    }
+        @Operation(summary = "List questions with pagination", description = "Retrieve a paginated list of questions with optional filtering")
+        @GetMapping("/paged")
+        public ResponseEntity<org.springframework.data.domain.Page<QuestionDTO>> getQuestionsPaged(
+                        @RequestParam(required = false) Long subjectId,
+                        @RequestParam(required = false) Long topicId,
+                        @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
+                return ResponseEntity.ok(questionService.getPaginatedQuestions(subjectId, topicId, pageable));
+        }
 
-    @Operation(summary = "Get question by ID", description = "Retrieve a specific question by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Question found", content = @Content(schema = @Schema(implementation = QuestionDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Question not found", content = @Content)
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable Long id) {
-        return ResponseEntity.ok(questionService.getQuestion(id));
-    }
+        @Operation(summary = "Get question by ID", description = "Retrieve a specific question by its ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Question found", content = @Content(schema = @Schema(implementation = QuestionDTO.class))),
+                        @ApiResponse(responseCode = "404", description = "Question not found", content = @Content)
+        })
+        @GetMapping("/{id}")
+        public ResponseEntity<QuestionDTO> getQuestion(@PathVariable Long id) {
+                return ResponseEntity.ok(questionService.getQuestion(id));
+        }
 
-    @Operation(summary = "Delete question", description = "Delete a question by its ID", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Question deleted successfully", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = "Question not found", content = @Content)
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
-        questionService.deleteQuestion(id);
-        return ResponseEntity.ok("Question deleted successfully");
-    }
+        @Operation(summary = "Delete question", description = "Delete a question by its ID", security = @SecurityRequirement(name = "bearerAuth"))
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Question deleted successfully", content = @Content(schema = @Schema(implementation = String.class))),
+                        @ApiResponse(responseCode = "404", description = "Question not found", content = @Content)
+        })
+        @DeleteMapping("/{id}")
+        public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
+                questionService.deleteQuestion(id);
+                return ResponseEntity.ok("Question deleted successfully");
+        }
 }

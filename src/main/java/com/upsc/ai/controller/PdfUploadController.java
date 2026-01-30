@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/pdfs")
+@RequestMapping("/api/v1/pdfs")
 @Tag(name = "PDF Documents", description = "PDF upload, management, and download endpoints")
 public class PdfUploadController {
 

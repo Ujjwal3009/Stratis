@@ -40,17 +40,66 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**")
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/v1/auth/**"))
                                                 .permitAll()
-                                                .requestMatchers("/actuator/**").permitAll()
-                                                .requestMatchers("/h2-console/**").permitAll()
-                                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
-                                                                "/swagger-ui.html")
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/auth/**"))
                                                 .permitAll()
-                                                .requestMatchers("/api/test/**", "/api/tests/**").authenticated()
-                                                .requestMatchers("/api/pdfs/**", "/api/questions/**").authenticated()
-                                                .requestMatchers("/api/health/**", "/api/subjects/**").permitAll()
-                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/oauth2/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/login/oauth2/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/actuator/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/h2-console/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/swagger-ui/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/v3/api-docs/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/swagger-ui.html"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/v1/health/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/v1/subjects/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/health/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/subjects/**"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/error"))
+                                                .permitAll()
+                                                .requestMatchers(
+                                                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                                                                .antMatcher("/api/v1/admin/**"))
+                                                .hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
                                                 .successHandler(oAuth2SuccessHandler))

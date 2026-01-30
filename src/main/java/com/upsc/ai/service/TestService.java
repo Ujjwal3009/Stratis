@@ -61,9 +61,13 @@ public class TestService {
     }
 
     @Transactional
-    public TestResultDTO submitAttempt(TestSubmissionDTO submission) {
+    public TestResultDTO submitAttempt(TestSubmissionDTO submission, Long userId) {
         TestAttempt attempt = attemptRepository.findById(submission.getAttemptId())
                 .orElseThrow(() -> new BusinessException("Attempt not found"));
+
+        if (!attempt.getUser().getId().equals(userId)) {
+            throw new BusinessException("Access Denied: You do not own this test attempt");
+        }
 
         if (attempt.getStatus() != TestAttempt.AttemptStatus.IN_PROGRESS) {
             throw new BusinessException("Attempt already submitted or abandoned");
@@ -202,9 +206,13 @@ public class TestService {
     }
 
     @Transactional
-    public TestAnalysisDTO generateAnalysis(Long attemptId) {
+    public TestAnalysisDTO generateAnalysis(Long attemptId, Long userId) {
         TestAttempt attempt = attemptRepository.findById(attemptId)
                 .orElseThrow(() -> new BusinessException("Attempt not found"));
+
+        if (!attempt.getUser().getId().equals(userId)) {
+            throw new BusinessException("Access Denied: You do not own this test attempt");
+        }
 
         if (attempt.getStatus() != TestAttempt.AttemptStatus.COMPLETED) {
             throw new BusinessException("Cannot analyze an in-progress or abandoned test.");
@@ -344,7 +352,7 @@ public class TestService {
         }
 
         try {
-            String aiResponse = geminiAiService.generateAnalysisInsights(contextBuilder.toString());
+            String aiResponse = geminiAiService.generateAnalysisInsights(contextBuilder.toString(), attempt.getUser());
             // Extract JSON from response if it has markdown
             if (aiResponse.contains("```json")) {
                 aiResponse = aiResponse.substring(aiResponse.indexOf("```json") + 7, aiResponse.lastIndexOf("```"))

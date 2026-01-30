@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.cache.annotation.Cacheable;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/subjects")
+@RequestMapping("/api/v1/subjects")
 @Tag(name = "Subjects", description = "Subject management endpoints")
 public class SubjectController {
 

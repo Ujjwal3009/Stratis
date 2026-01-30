@@ -159,7 +159,8 @@ public class TestGenerationService {
                 topicName,
                 request.getDifficulty(),
                 count,
-                context);
+                context,
+                user);
 
         List<Question> newQuestions = new ArrayList<>();
         for (ParsedQuestion pq : aiParsedQuestions) {

@@ -25,6 +25,12 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<QuestionDTO> getPaginatedQuestions(Long subjectId, Long topicId,
+            org.springframework.data.domain.Pageable pageable) {
+        return questionRepository.findAllPaged(subjectId, topicId, pageable)
+                .map(QuestionDTO::fromEntity);
+    }
+
     public QuestionDTO getQuestion(Long id) {
         return questionRepository.findById(id)
                 .map(QuestionDTO::fromEntity)

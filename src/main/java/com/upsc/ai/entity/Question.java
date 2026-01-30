@@ -1,11 +1,10 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.SoftDelete;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,7 +12,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Question {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@SoftDelete
+public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,7 +42,7 @@ public class Question {
     @Column(columnDefinition = "TEXT")
     private String explanation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "source_pdf_id")
     private PdfDocument sourcePdf;
 
@@ -91,23 +93,6 @@ public class Question {
     @lombok.ToString.Exclude
     @lombok.EqualsAndHashCode.Exclude
     private List<QuestionOption> options;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     public enum QuestionType {
         MCQ, SUBJECTIVE, TRUE_FALSE

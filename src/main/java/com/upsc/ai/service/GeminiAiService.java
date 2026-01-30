@@ -21,11 +21,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.upsc.ai.repository.UserTokenUsageRepository;
+import com.upsc.ai.entity.UserTokenUsage;
+import com.upsc.ai.entity.User;
+
 @Service
 public class GeminiAiService {
+    @Autowired
+    private UserTokenUsageRepository tokenUsageRepository;
 
     @Value("${GEMINI_API_KEY:}")
     private String apiKey;
@@ -61,7 +69,7 @@ public class GeminiAiService {
         }
     }
 
-    public List<ParsedQuestion> parseQuestions(String pdfText) {
+    public List<ParsedQuestion> parseQuestions(String pdfText, User user) {
         String prompt = buildQuestionExtractionPrompt(pdfText);
         String output;
 
@@ -69,11 +77,13 @@ public class GeminiAiService {
             try {
                 GenerateContentResponse response = model.generateContent(prompt);
                 output = ResponseHandler.getText(response);
+                // Extract usage metadata if available (Vertex AI client)
+                logUsage(user, modelName, output.length() / 4, 100, "PDF_PARSING");
             } catch (IOException e) {
                 throw new BusinessException("Error calling Vertex AI: " + e.getMessage());
             }
         } else if (apiKey != null && !apiKey.isEmpty()) {
-            output = callDirectApi(prompt);
+            output = callDirectApi(prompt, user, "PDF_PARSING");
         } else {
             return mockParseQuestions(pdfText);
         }
@@ -81,8 +91,9 @@ public class GeminiAiService {
         return parseJsonResponse(output);
     }
 
+    @CircuitBreaker(name = "geminiAi", fallbackMethod = "generateQuestionsFallback")
     public List<ParsedQuestion> generateQuestions(String subject, String topic, String minDifficulty, int count,
-            String context) {
+            String context, User user) {
         String prompt = buildQuestionGenerationPrompt(subject, topic, minDifficulty, count, context);
         String output;
 
@@ -99,7 +110,7 @@ public class GeminiAiService {
             try {
                 System.out.println("Using Direct REST API for generation with Key ending in: "
                         + (apiKey.length() > 4 ? apiKey.substring(apiKey.length() - 4) : "****"));
-                output = callDirectApi(prompt);
+                output = callDirectApi(prompt, user, "QUESTION_GENERATION");
             } catch (Exception e) {
                 System.err.println("Gemini API failed with exception: " + e.getMessage());
                 e.printStackTrace();
@@ -133,17 +144,25 @@ public class GeminiAiService {
         }
     }
 
-    public String generateAnalysisInsights(String analysisContext) {
+    public List<ParsedQuestion> generateQuestionsFallback(String subject, String topic, String minDifficulty, int count,
+            String context, User user, Throwable t) {
+        System.err.println("Circuit Breaker triggered for Gemini AI: " + t.getMessage());
+        return loadStaticQuestions();
+    }
+
+    public String generateAnalysisInsights(String analysisContext, User user) {
         String prompt = buildAnalysisPrompt(analysisContext);
         if (model != null) {
             try {
                 GenerateContentResponse response = model.generateContent(prompt);
-                return ResponseHandler.getText(response);
+                String output = ResponseHandler.getText(response);
+                logUsage(user, modelName, analysisContext.length() / 4, output.length() / 4, "ANALYSIS");
+                return output;
             } catch (IOException e) {
                 throw new BusinessException("Error calling Vertex AI: " + e.getMessage());
             }
         } else if (apiKey != null && !apiKey.isEmpty()) {
-            return callDirectApi(prompt);
+            return callDirectApi(prompt, user, "ANALYSIS");
         } else {
             return "{\"diagnosticSummary\": \"Mock analysis: You performed well in History but need to focus on timing for Economy.\", \"studyNotes\": \"Key concept: Fiscal policy impact on inflation...\", \"strengthWeaknessPairs\": [{\"point\": \"Ancient History recall\", \"strategy\": \"Practice mapping sites to periods.\"}], \"mistakeCategorization\": [{\"questionId\": 1, \"type\": \"SILLY_MISTAKE\", \"reason\": \"Fast response on easy question\"}]}";
         }
@@ -180,7 +199,7 @@ public class GeminiAiService {
     }
 
     @SuppressWarnings("unchecked")
-    private String callDirectApi(String prompt) {
+    private String callDirectApi(String prompt, User user, String featureArea) {
         String url = String.format("https://generativelanguage.googleapis.com/v1/models/%s:generateContent?key=%s",
                 modelName, apiKey);
 
@@ -198,6 +217,15 @@ public class GeminiAiService {
         try {
             Map<String, Object> response = restTemplate.postForObject(url, body, Map.class);
             if (response != null && response.containsKey("candidates")) {
+                // Tracking Usage
+                Map<String, Object> usage = (Map<String, Object>) response.get("usageMetadata");
+                if (usage != null && user != null) {
+                    logUsage(user, modelName,
+                            (Integer) usage.get("promptTokenCount"),
+                            (Integer) usage.get("candidatesTokenCount"),
+                            featureArea);
+                }
+
                 List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
                 if (!candidates.isEmpty()) {
                     Map<String, Object> firstCandidate = candidates.get(0);
@@ -209,6 +237,21 @@ public class GeminiAiService {
             throw new BusinessException("Empty response from Gemini API");
         } catch (Exception e) {
             throw new BusinessException("Error calling Gemini direct API: " + e.getMessage());
+        }
+    }
+
+    private void logUsage(User user, String model, Integer prompt, Integer completion, String area) {
+        try {
+            UserTokenUsage usage = new UserTokenUsage();
+            usage.setUser(user);
+            usage.setModelName(model);
+            usage.setPromptTokens(prompt != null ? prompt : 0);
+            usage.setCompletionTokens(completion != null ? completion : 0);
+            usage.setTotalTokens(usage.getPromptTokens() + usage.getCompletionTokens());
+            usage.setFeatureArea(area);
+            tokenUsageRepository.save(usage);
+        } catch (Exception e) {
+            System.err.println("Failed to log token usage: " + e.getMessage());
         }
     }
 

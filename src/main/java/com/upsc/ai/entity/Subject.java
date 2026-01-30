@@ -1,11 +1,9 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,7 +11,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Subject {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class Subject extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,12 +29,4 @@ public class Subject {
     @lombok.ToString.Exclude
     @lombok.EqualsAndHashCode.Exclude
     private List<Topic> topics;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

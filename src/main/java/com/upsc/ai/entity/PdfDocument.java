@@ -1,9 +1,9 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.SoftDelete;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PdfDocument {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@SoftDelete
+public class PdfDocument extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,22 +50,11 @@ public class PdfDocument {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        uploadDate = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    protected void onPrePersist() {
+        if (uploadDate == null) {
+            uploadDate = LocalDateTime.now();
+        }
     }
 
     public enum DocumentType {

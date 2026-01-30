@@ -1,11 +1,10 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.SoftDelete;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,7 +12,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Test {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@SoftDelete
+public class Test extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,14 +59,8 @@ public class Test {
     @Column(name = "total_marks", nullable = false)
     private Integer totalMarks = 0;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
+    protected void onPrePersist() {
         if (totalMarks == null) {
             totalMarks = questions != null ? questions.size() : 0;
         }

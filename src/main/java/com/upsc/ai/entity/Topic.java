@@ -1,18 +1,17 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "topics", uniqueConstraints = { @UniqueConstraint(columnNames = { "subject_id", "name" }) })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Topic {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class Topic extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,12 +28,4 @@ public class Topic {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

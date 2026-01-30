@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.upsc.ai.repository.UserRepository;
+import com.upsc.ai.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,9 @@ public class InventoryRefillService {
 
     @Autowired
     private QuestionService questionService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Async
     public void triggerRefill(Subject subject, Topic topic, String difficultyLevel) {
@@ -44,13 +49,16 @@ public class InventoryRefillService {
 
                 String topicName = topic != null ? topic.getName() : "General " + subject.getName();
 
+                User systemUser = userRepository.findAll().stream().findFirst().orElse(null);
+
                 // 2. Generate new questions via AI
                 List<ParsedQuestion> generated = geminiAiService.generateQuestions(
                         subject.getName(),
                         topicName,
                         difficultyLevel,
                         batchSize,
-                        null);
+                        null,
+                        systemUser);
 
                 // 3. Save with created_source = "AI" and is_verified = false
                 for (ParsedQuestion pq : generated) {

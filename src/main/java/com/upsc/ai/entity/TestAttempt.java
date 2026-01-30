@@ -1,9 +1,9 @@
 package com.upsc.ai.entity;
 
+import com.upsc.ai.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.SoftDelete;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +13,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestAttempt {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@SoftDelete
+public class TestAttempt extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

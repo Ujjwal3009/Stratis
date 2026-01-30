@@ -1,17 +1,11 @@
 spring:
   application:
     name: upsc-backend
-
-# Sentry Configuration
-sentry:
-  dsn: ${SENTRY_DSN:https://695c4d4daa40d9a82cc906af8cc866ef@o4510794552246272.ingest.de.sentry.io/4510794561552464}
-  traces-sample-rate: 1.0
-  exception-resolver-order: -2147483647 # Highest priority
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/upsc_ai_dev?stringtype=unspecified&prepareThreshold=0
+    url: jdbc:postgresql://localhost:5432/upsc_ai_dev?stringtype=unspecified&prepareThreshold=0&reWriteBatchedInserts=true
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
@@ -25,6 +19,13 @@ sentry:
     hibernate:
       ddl-auto: ${DDL_AUTO:validate}
     show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: ${HIBERNATE_STATS:false}
   
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
@@ -58,6 +59,12 @@ sentry:
       enabled: true
       max-file-size: 50MB
       max-request-size: 50MB
+
+# Sentry Configuration
+sentry:
+  dsn: ${SENTRY_DSN:https://695c4d4daa40d9a82cc906af8cc866ef@o4510794552246272.ingest.de.sentry.io/4510794561552464}
+  traces-sample-rate: 1.0
+  exception-resolver-order: -2147483647 # Highest priority
 
 server:
   port: ${SERVER_PORT:8080}
@@ -141,3 +148,18 @@ springdoc:
     operations-sorter: alpha
   show-actuator: false
   packages-to-scan: com.upsc.ai.controller
+
+# AI Prompts
+prompts:
+  upsc:
+    analysis: |
+      You are a senior UPSC mentor and performance analyst.
+      Analyze the following test results for a UPSC aspirant and provide a deep diagnostic report.
+      
+      YOUR GOAL:
+      1. Identify patterns in mistakes (Silly vs Knowledge Gap vs Logical).
+      2. Provide 'Study Notes': A concise bulleted summary of the core concepts tested.
+      3. Strength vs Weakness: Actionable points.
+    generation: |
+      You are a senior UPSC Civil Services Preliminary Examination (Prelims) expert.
+      Generate questions using official professional language and dynamic MCQ structures.

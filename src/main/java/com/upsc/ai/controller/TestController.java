@@ -30,7 +30,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/tests")
+@RequestMapping("/api/v1/tests")
 @Tag(name = "Tests", description = "Test generation, execution, and submission endpoints")
 public class TestController {
 
@@ -94,14 +94,23 @@ public class TestController {
                         @ApiResponse(responseCode = "404", description = "Test attempt not found", content = @Content)
         })
         @PostMapping("/submit")
-        public ResponseEntity<TestResultDTO> submitTest(@RequestBody TestSubmissionDTO submission) {
-                return ResponseEntity.ok(testService.submitAttempt(submission));
+        public ResponseEntity<TestResultDTO> submitTest(
+                        @RequestBody TestSubmissionDTO submission,
+                        @AuthenticationPrincipal UserPrincipal currentUser) {
+                if (currentUser == null) {
+                        throw new BusinessException("Unauthorized: Please log in again");
+                }
+                return ResponseEntity.ok(testService.submitAttempt(submission, currentUser.getId()));
         }
 
         @GetMapping("/attempts/{attemptId}/analysis")
         public ResponseEntity<TestAnalysisDTO> getTestAnalysis(
-                        @PathVariable Long attemptId) {
-                return ResponseEntity.ok(testService.generateAnalysis(attemptId));
+                        @PathVariable Long attemptId,
+                        @AuthenticationPrincipal UserPrincipal currentUser) {
+                if (currentUser == null) {
+                        throw new BusinessException("Unauthorized: Please log in again");
+                }
+                return ResponseEntity.ok(testService.generateAnalysis(attemptId, currentUser.getId()));
         }
 
         @PostMapping("/attempts/{attemptId}/remedial")
@@ -132,7 +141,7 @@ public class TestController {
         @GetMapping("/history")
         public ResponseEntity<List<TestResultDTO>> getTestHistory(@AuthenticationPrincipal UserPrincipal currentUser) {
                 if (currentUser == null) {
-                        throw new RuntimeException("Unauthorized");
+                        throw new BusinessException("Unauthorized: Please log in again");
                 }
                 User user = userRepository.findById(currentUser.getId())
                                 .orElseThrow(() -> new RuntimeException("User not found"));

@@ -57,7 +57,7 @@ public class QuestionProcessingService {
             pdfChunkService.createChunks(pdf, text);
 
             // 3. Parse questions with Gemini
-            List<ParsedQuestion> parsedQuestions = geminiAiService.parseQuestions(text);
+            List<ParsedQuestion> parsedQuestions = geminiAiService.parseQuestions(text, user);
 
             // 3. Save questions
             List<Question> savedQuestions = new ArrayList<>();
