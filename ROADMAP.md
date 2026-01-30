@@ -15,6 +15,11 @@
 - [ ] **DevOps Maturity**
     - [ ] **Git Flow**: Establish `main` (Prod), `staging` (Pre-Prod), and `dev` branches.
     - [ ] **CI/CD** Pipelines: Auto-deploy `dev` to Render Test env, `main` to Prod.
+    - [ ] **Production Deployment (Budget: $10-12/mo)**
+        - [ ] **Backend**: Render "Starter" ($7/mo) for 24/7 uptime (No cold starts).
+        - [ ] **Database**: Neon Serverless (Free Tier initially).
+        - [ ] **Frontend**: Vercel (Free).
+        - [ ] **AI**: Gemini Pay-as-you-go (~$2-3/mo).
 - [ ] **Admin Dashboard (Internal Tool)**
     - [ ] **Token Monitor**: Visualization of Gemini API usage (Cost Control).
     - [ ] **User Management**: View active users, ban spam accounts.
