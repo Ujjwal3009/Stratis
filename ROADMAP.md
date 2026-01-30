@@ -10,6 +10,17 @@
     - [ ] Source-to-Question linking (metadata storage)
     - [ ] Option to "Chat with PDF" for conceptual clarity
 
+
+## Phase 2.5: Professional Workflow & Hardening (New)
+- [ ] **DevOps Maturity**
+    - [ ] **Git Flow**: Establish `main` (Prod), `staging` (Pre-Prod), and `dev` branches.
+    - [ ] **CI/CD** Pipelines: Auto-deploy `dev` to Render Test env, `main` to Prod.
+- [ ] **Admin Dashboard (Internal Tool)**
+    - [ ] **Token Monitor**: Visualization of Gemini API usage (Cost Control).
+    - [ ] **User Management**: View active users, ban spam accounts.
+    - [ ] **Content CMS**: Interface to upload/edit Questions (fix "Polity" vs "Indian Polity" mismatch).
+    - [ ] **System Settings**: Hot-swap API Keys, toggle "Mock Mode" vs "Live AI" without code deploys.
+
 ## Phase 3: Engagement & Growth
 - [ ] **Gamification Layer**
     - [ ] Daily test streaks
