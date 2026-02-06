@@ -1,39 +1,45 @@
-# UPSC AI Platform
+# UPSC AI Platform (Backend)
 
 An advanced AI-powered platform for UPSC preparation, featuring automated test generation, behavioral analytics, and remedial learning.
 
-## Repository Structure
-- **/upsc-backend**: Spring Boot application (Java 17)
-- **/upsc-frontend**: Next.js 15 application (React 19)
-- **/docs**: Product and business documentation
-- **/scripts**: Helper scripts for environment management
+## 📚 Production Documentation
 
-## Standard Startup Features
+Explore the detailed technical documentation for the entire platform:
 
-### 1. Automation & CI/CD
-- **Backend CI**: Runs Maven build, Checkstyle, SpotBugs, and JaCoCo on every push.
-- **Frontend CI**: Runs Next.js build, Lint, Prettier check, and Vitest unit tests.
+- **[System Architecture](docs/ARCHITECTURE.md)**: High-level overview and tech stack.
+- **[Design & Implementation](docs/DESIGN.md)**: Low-level details, patterns, and data models.
+- **[User Journey & Features](docs/USER_JOURNEY.md)**: Core prep cycle and intelligent features.
+- **[Technical Deep Dive](docs/TECHNICAL_DEEP_DIVE.md)**: File-by-file logic and code flow breakdown.
+- **[Onboarding & Contributing](docs/CONTRIBUTING.md)**: Setup guide for new developers and beginners.
+- **[Deployment Guide](docs/DEPLOYMENT.md)**: Step-by-step free-to-play and production instructions.
 
-### 2. Observability & Error Tracking
-- Integrated with **Sentry** for real-time error tracking and session replays.
-- Actuator endpoints exposed for Prometheus monitoring.
+---
 
-### 3. Code Quality
-- **Static Analysis**: Google Java Style enforced via Checkstyle.
-- **Pre-commit Hooks**: Husky and lint-staged prevent broken code from being committed.
-- **API Documentation**: Interactive Swagger UI available at `/swagger-ui.html`.
+## 🛡️ Production Readiness Features
+
+### Security & Resilience
+- **Actuator Security**: Hardened endpoints restricted to `ADMIN` roles.
+- **Distributed Rate Limiting**: Redis-backed Bucket4j implementation for multi-replica scaling.
+- **CORS Management**: Dynamically injected allowed origins for secure cross-domain communication.
+- **AI Fallbacks**: Robust circuit breakers and static fallback mechanisms.
+
+### Automation & Quality
+- **CI/CD Pipeline**: GitHub Actions for automated building, linting, and security scans.
+- **Error Tracking**: Full Sentry integration for real-time error monitoring.
+- **API Documentation**: Interactive Swagger UI at `/swagger-ui.html`.
 
 ## Getting Started
 
+Refer to the **[Onboarding Guide](docs/CONTRIBUTING.md)** for a complete local setup.
+
 ### Prerequisites
 - JDK 17
-- Node.js 20+
-- PostgreSQL
+- PostgreSQL & Redis (Docker Compose provided)
 
-### Local Setup
-1. Clone BOTH repositories.
-2. In `upsc-backend`, copy `.env.example` to `.env` and fill the values. Run `./mvnw spring-boot:run`.
-3. In `upsc-frontend`, run `npm install` and `npm run dev`.
+### Launch
+```bash
+mvn spring-boot:run
+```
 
 ## API Discovery
 Access the OpenAPI documentation at: `http://localhost:8080/swagger-ui.html`
