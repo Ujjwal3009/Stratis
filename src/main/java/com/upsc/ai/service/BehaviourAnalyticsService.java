@@ -1,8 +1,10 @@
 package com.upsc.ai.service;
 
 import com.google.gson.Gson;
+import com.upsc.ai.dto.GlobalPerformanceDTO;
 import com.upsc.ai.dto.TestSubmissionDTO;
 import com.upsc.ai.entity.*;
+import com.upsc.ai.repository.UserQuestionAttemptRepository;
 import com.upsc.ai.repository.UserTestMetricsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ public class BehaviourAnalyticsService {
 
     @Autowired
     private UserTestMetricsRepository metricsRepository;
+
+    @Autowired
+    private UserQuestionAttemptRepository questionAttemptRepository;
 
     private final Gson gson = new Gson();
 
@@ -267,5 +272,75 @@ public class BehaviourAnalyticsService {
                 .count();
 
         return calculatePercentage((int) hardAttempted, (int) hardTotal);
+    }
+
+    public GlobalPerformanceDTO calculateGlobalPerformance(User user) {
+        List<UserQuestionAttempt> attempts = questionAttemptRepository.findByUserId(user.getId());
+        List<UserTestMetrics> metricsList = metricsRepository.findByUserId(user.getId());
+
+        GlobalPerformanceDTO globalStats = new GlobalPerformanceDTO();
+
+        if (attempts.isEmpty()) {
+            return globalStats;
+        }
+
+        // Subject Accuracy
+        Map<String, List<UserQuestionAttempt>> bySubject = attempts.stream()
+                .filter(a -> a.getQuestion() != null && a.getQuestion().getSubject() != null)
+                .collect(Collectors.groupingBy(a -> a.getQuestion().getSubject().getName()));
+
+        Map<String, Double> subjectAcc = new HashMap<>();
+        bySubject.forEach((name, list) -> {
+            long correct = list.stream().filter(a -> Boolean.TRUE.equals(a.getIsCorrect())).count();
+            subjectAcc.put(name, (double) correct / list.size() * 100);
+        });
+        globalStats.setSubjectAccuracy(subjectAcc);
+
+        // Topic Accuracy
+        Map<String, List<UserQuestionAttempt>> byTopic = attempts.stream()
+                .filter(a -> a.getQuestion() != null && a.getQuestion().getTopic() != null)
+                .collect(Collectors.groupingBy(a -> a.getQuestion().getTopic().getName()));
+
+        Map<String, Double> topicAcc = new HashMap<>();
+        byTopic.forEach((name, list) -> {
+            long correct = list.stream().filter(a -> Boolean.TRUE.equals(a.getIsCorrect())).count();
+            topicAcc.put(name, (double) correct / list.size() * 100);
+        });
+        globalStats.setTopicAccuracy(topicAcc);
+
+        // Behavioural Trends
+        if (metricsList != null && !metricsList.isEmpty()) {
+            GlobalPerformanceDTO.BehaviouralTrendsDTO trends = new GlobalPerformanceDTO.BehaviouralTrendsDTO();
+            trends.setAvgFirstInstinctAccuracy(metricsList.stream().map(UserTestMetrics::getFirstInstinctAccuracy)
+                    .filter(java.util.Objects::nonNull).mapToDouble(BigDecimal::doubleValue).average().orElse(0.0));
+            trends.setAvgEliminationEfficiency(metricsList.stream().map(UserTestMetrics::getEliminationEfficiency)
+                    .filter(java.util.Objects::nonNull).mapToDouble(BigDecimal::doubleValue).average().orElse(0.0));
+            trends.setTotalNegativeMarks(metricsList.stream().map(UserTestMetrics::getNegativeMarks)
+                    .filter(java.util.Objects::nonNull).mapToDouble(BigDecimal::doubleValue).sum());
+            trends.setTotalImpulsiveErrors(metricsList.stream()
+                    .mapToInt(m -> m.getImpulsiveErrorCount() != null ? m.getImpulsiveErrorCount() : 0).sum());
+            trends.setTotalOverthinkingErrors(metricsList.stream()
+                    .mapToInt(m -> m.getOverthinkingErrorCount() != null ? m.getOverthinkingErrorCount() : 0).sum());
+            trends.setAvgConfidenceIndex(metricsList.stream().map(UserTestMetrics::getConfidenceIndex)
+                    .filter(java.util.Objects::nonNull).mapToDouble(BigDecimal::doubleValue).average().orElse(0.0));
+            globalStats.setBehaviouralTrends(trends);
+        }
+
+        // Strengths & Weaknesses (Top 3 of each)
+        List<GlobalPerformanceDTO.StrengthWeaknessDTO> strengths = subjectAcc.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .limit(3)
+                .map(e -> new GlobalPerformanceDTO.StrengthWeaknessDTO(e.getKey(), e.getValue(), "SUBJECT"))
+                .collect(Collectors.toList());
+        globalStats.setStrengths(strengths);
+
+        List<GlobalPerformanceDTO.StrengthWeaknessDTO> weaknesses = subjectAcc.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .limit(3)
+                .map(e -> new GlobalPerformanceDTO.StrengthWeaknessDTO(e.getKey(), e.getValue(), "SUBJECT"))
+                .collect(Collectors.toList());
+        globalStats.setWeaknesses(weaknesses);
+
+        return globalStats;
     }
 }

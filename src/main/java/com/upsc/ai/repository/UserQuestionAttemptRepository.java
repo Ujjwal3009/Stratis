@@ -13,4 +13,6 @@ public interface UserQuestionAttemptRepository extends JpaRepository<UserQuestio
 
     @Query("SELECT distinct uqa.question.id FROM UserQuestionAttempt uqa WHERE uqa.user.id = :userId")
     List<Long> findAttemptedQuestionIdsByUserId(@Param("userId") Long userId);
+
+    List<UserQuestionAttempt> findByUserId(Long userId);
 }

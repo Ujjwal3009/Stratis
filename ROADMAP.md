@@ -12,8 +12,8 @@
 
 
 ## Phase 2.5: Professional Workflow & Hardening (New)
-- [ ] **DevOps Maturity**
-    - [ ] **Git Flow**: Establish `main` (Prod), `staging` (Pre-Prod), and `dev` branches.
+- [ ] **DevOps Maturity**blish `main` (Pro
+    - [ ] **Git Flow**: Estad), `staging` (Pre-Prod), and `dev` branches.
     - [ ] **CI/CD** Pipelines: Auto-deploy `dev` to Render Test env, `main` to Prod.
     - [ ] **Production Deployment (Budget: $10-12/mo)**
         - [ ] **Backend**: Render "Starter" ($7/mo) for 24/7 uptime (No cold starts).

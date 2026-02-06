@@ -4,6 +4,8 @@ import com.upsc.ai.dto.QuestionDTO;
 import com.upsc.ai.exception.BusinessException;
 import com.upsc.ai.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ public class QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Cacheable(value = "questions", key = "#subjectId + '-' + #difficulty")
     public List<QuestionDTO> listQuestions(Long subjectId, String difficulty) {
         // Simple implementation for now, can be expanded with Specification
         return questionRepository.findAll().stream()
@@ -38,6 +41,7 @@ public class QuestionService {
     }
 
     @Transactional
+    @CacheEvict(value = "questions", allEntries = true)
     public void deleteQuestion(Long id) {
         if (!questionRepository.existsById(id)) {
             throw new BusinessException("Question not found: " + id);

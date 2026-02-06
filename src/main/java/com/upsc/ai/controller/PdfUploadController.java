@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -158,5 +159,23 @@ public class PdfUploadController {
         public ResponseEntity<String> deletePdf(@PathVariable Long id) {
                 pdfService.deletePdf(id);
                 return ResponseEntity.ok("PDF deleted successfully");
+        }
+
+        @PostMapping("/{id}/chat")
+        public ResponseEntity<Map<String, String>> chatWithPdf(
+                        @PathVariable Long id,
+                        @RequestBody Map<String, String> request,
+                        @AuthenticationPrincipal UserPrincipal currentUser) {
+
+                if (currentUser == null) {
+                        throw new RuntimeException("Unauthorized");
+                }
+                User user = userRepository.findById(currentUser.getId())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                String query = request.get("query");
+                String answer = pdfService.chatWithPdf(id, query, user);
+
+                return ResponseEntity.ok(Map.of("answer", answer));
         }
 }

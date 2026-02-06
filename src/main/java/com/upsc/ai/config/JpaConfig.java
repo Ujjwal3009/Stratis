@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
+@org.springframework.cache.annotation.EnableCaching
 public class JpaConfig {
 
     @Bean

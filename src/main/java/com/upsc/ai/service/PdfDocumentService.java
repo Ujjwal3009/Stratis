@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.upsc.ai.entity.PdfChunk;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,12 @@ public class PdfDocumentService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private PdfChunkService chunkService;
+
+    @Autowired
+    private GeminiAiService geminiService;
 
     public PdfUploadResponse uploadPdf(MultipartFile file, DocumentType type, User user, String description) {
         // Validate file
@@ -101,6 +108,23 @@ public class PdfDocumentService {
 
         // Delete metadata from database
         repository.delete(document);
+    }
+
+    public String chatWithPdf(Long pdfId, String query, User user) {
+        PdfDocument doc = repository.findById(pdfId)
+                .orElseThrow(() -> new BusinessException("PDF not found"));
+
+        List<PdfChunk> chunks = chunkService.getChunksByPdf(doc);
+
+        // For simplicity, we join the first few chunks or search for keywords
+        // In a production app, we would use vector embeddings.
+        // Here we join first 5 chunks (~15k characters)
+        String context = chunks.stream()
+                .limit(10)
+                .map(PdfChunk::getChunkText)
+                .collect(Collectors.joining("\n---\n"));
+
+        return geminiService.chatWithDocument(query, context, user);
     }
 
     private void validatePdfFile(MultipartFile file) {

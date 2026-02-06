@@ -168,6 +168,34 @@ public class GeminiAiService {
         }
     }
 
+    public String chatWithDocument(String userQuery, String documentContext, User user) {
+        String prompt = buildChatWithPdfPrompt(userQuery, documentContext);
+        if (model != null) {
+            try {
+                GenerateContentResponse response = model.generateContent(prompt);
+                String result = ResponseHandler.getText(response);
+                logUsage(user, modelName, prompt.length() / 4, result.length() / 4, "PDF_CHAT");
+                return result;
+            } catch (IOException e) {
+                throw new BusinessException("Error calling Vertex AI: " + e.getMessage());
+            }
+        } else if (apiKey != null && !apiKey.isEmpty()) {
+            return callDirectApi(prompt, user, "PDF_CHAT");
+        } else {
+            return "Mock Answer: This document discusses UPSC topics, but I can't analyze details without an API key.";
+        }
+    }
+
+    private String buildChatWithPdfPrompt(String query, String context) {
+        return "You are an AI assistant specialized in UPSC preparation. " +
+                "Use the following text excerpt from a UPSC study material to answer the user's question. " +
+                "If the answer is not in the text, use your internal knowledge to supplement the answer, but prioritize the provided text. "
+                +
+                "Be academic, concise, and helpful.\n\n" +
+                "CONTEXT:\n" + context + "\n\n" +
+                "USER QUESTION: " + query;
+    }
+
     private String buildAnalysisPrompt(String context) {
         return """
                 You are a senior UPSC mentor and performance analyst.

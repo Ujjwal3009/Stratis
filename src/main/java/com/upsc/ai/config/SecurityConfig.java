@@ -32,6 +32,12 @@ public class SecurityConfig {
         @Autowired
         private OAuth2SuccessHandler oAuth2SuccessHandler;
 
+        @org.springframework.beans.factory.annotation.Value("${app.security.google-auth-enabled:false}")
+        private boolean googleAuthEnabled;
+
+        @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:8080}")
+        private String allowedOrigins;
+
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
@@ -59,7 +65,7 @@ public class SecurityConfig {
                                                 .requestMatchers(
                                                                 org.springframework.security.web.util.matcher.AntPathRequestMatcher
                                                                                 .antMatcher("/actuator/**"))
-                                                .permitAll()
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(
                                                                 org.springframework.security.web.util.matcher.AntPathRequestMatcher
                                                                                 .antMatcher("/h2-console/**"))
@@ -101,15 +107,18 @@ public class SecurityConfig {
                                                                                 .antMatcher("/api/v1/admin/**"))
                                                 .hasRole("ADMIN")
                                                 .anyRequest().authenticated())
-                                .oauth2Login(oauth2 -> oauth2
-                                                .successHandler(oAuth2SuccessHandler))
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                                 .exceptionHandling(exceptions -> exceptions
                                                 .defaultAuthenticationEntryPointFor(
                                                                 new org.springframework.security.web.authentication.HttpStatusEntryPoint(
                                                                                 org.springframework.http.HttpStatus.UNAUTHORIZED),
                                                                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(
-                                                                                "/api/**")))
-                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                                                                                "/api/**")));
+
+                if (googleAuthEnabled) {
+                        http.oauth2Login(oauth2 -> oauth2
+                                        .successHandler(oAuth2SuccessHandler));
+                }
 
                 // Allow H2 console frames
                 http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
@@ -120,7 +129,12 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080"));
+                if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+                        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+                } else {
+                        configuration.setAllowedOrigins(
+                                        Arrays.asList("http://localhost:3000", "http://localhost:8080"));
+                }
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
